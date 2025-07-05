@@ -1,19 +1,16 @@
 package org.example;
 
+import org.example.controlador.LibroDAO;
+import org.example.vista.Index;
+
+import javax.swing.*;
+
 public class Main {
     public static void main(String[] args) {
 
         LibroDAO dao = new LibroDAO();
-
-        // Crear libro
-        Libro libro = new Libro(52, "El Señor de los Anillos", "1954-07-29", true);
-        dao.crearLibro(libro);
-
-        // Leer libros
-        System.out.println("Lista de libros:");
-        dao.obtenerLibros().forEach(l ->
-                System.out.println(l.getId() + " - " + l.getTitulo() + " - " + l.getFechaPublicacion())
-        );
+        int id = Integer.parseInt(JOptionPane.showInputDialog(null,"Ingrese su id"));
+        Index index = new Index(dao.obtenerLibrosDisponibles(),id);
 
     }
 }
