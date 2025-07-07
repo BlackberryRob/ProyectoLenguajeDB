@@ -1,0 +1,35 @@
+package org.example.controlador;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.SQLException;
+import org.example.DBConnection;
+
+public class DevolucionDAO {
+
+    public void registrarDevolucion(int idPrestamo, java.util.Date fechaDevolucion) {
+        Connection con = null;
+        CallableStatement stmt = null;
+
+        try {
+            con = DBConnection.getConnection();
+            stmt = con.prepareCall("{ call Registrar_Devolucion(?, ?) }");
+
+            stmt.setInt(1, idPrestamo);
+            stmt.setDate(2, new Date(fechaDevolucion.getTime()));
+
+            stmt.execute();
+            System.out.println("✅ Devolución registrada correctamente.");
+        } catch (SQLException e) {
+            System.err.println("❌ Error al registrar devolución: " + e.getMessage());
+        } finally {
+            try {
+                if (stmt != null) stmt.close();
+                if (con != null) con.close();
+            } catch (SQLException ex) {
+                System.err.println("❌ Error cerrando conexión: " + ex.getMessage());
+            }
+        }
+    }
+}

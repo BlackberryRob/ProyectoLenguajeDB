@@ -9,55 +9,75 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-public class Index extends JFrame{
+public class Index extends JFrame {
     private JPanel MainPanel;
     private JButton Salir;
     private JScrollPane LibrosDisponibles;
     LibroDAO dao = new LibroDAO();
 
-    public Index (List<LibroDisponible> librosDisponibles, int userId){
-        Salir.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose();
-            }
-        });
+    public Index(List<LibroDisponible> librosDisponibles, int userId) {
+        // Configuraciones b醩icas de la ventana
+        setTitle("Biblioteca");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setSize(400, 400);
+        setLocationRelativeTo(null);
 
-        setContentPane(MainPanel); // Definir la ventana principal
-        setTitle("Biblioteca"); // Ponerle t铆tulo a la ventana
-        setDefaultCloseOperation(EXIT_ON_CLOSE); // Cerrar la aplicaci贸n en el X
-        setSize(400, 400); // Tama帽o: ancho x alto
-        setLocationRelativeTo(null); // Abrir en el centro
-        setVisible(true); // Hacer visible la ventana
+        // Panel principal con BorderLayout
+        MainPanel = new JPanel(new BorderLayout());
 
-        // Configurar el panel principal dentro del JScrollPane
+        // Panel para los libros con BoxLayout vertical
         JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS)); // Configuraci贸n vertical
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
 
-        // Crear elementos para cada restaurante
+        // Bot髇 para registrar devoluci髇
+        JButton btnRegistrarDevolucion = new JButton("Registrar Devoluci髇");
+        btnRegistrarDevolucion.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnRegistrarDevolucion.addActionListener(e -> new FrmRegistrarDevolucion().setVisible(true));
+        contentPanel.add(btnRegistrarDevolucion);
+        contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        // Bot髇 para registrar sanci髇
+        JButton btnRegistrarSancion = new JButton("Registrar Sanci髇");
+        btnRegistrarSancion.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnRegistrarSancion.addActionListener(e -> new FrmRegistrarSancion().setVisible(true));
+        contentPanel.add(btnRegistrarSancion);
+        contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        // Lista din醡ica de libros disponibles con bot髇 solicitar
         for (LibroDisponible libroDisponible : librosDisponibles) {
-            JPanel libroPanel = new JPanel();
-            libroPanel.setLayout(new FlowLayout(FlowLayout.CENTER)); // Alinear elementos al centro
+            JPanel libroPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
             JLabel nombreLibro = new JLabel(libroDisponible.getTitulo());
             JButton solicitar = new JButton("Solicitar");
             solicitar.addActionListener(e -> {
-                // Acci贸n para el bot贸n
-                String idLibroDisponible = String.valueOf(libroDisponible.getId());
-                int idLibroDisponibleInt = Integer.parseInt(idLibroDisponible);
+                int idLibroDisponibleInt = libroDisponible.getId();
                 dao.realizarPrestamo(idLibroDisponibleInt, userId);
                 dispose();
             });
-            // Agregar elementos al panel del restaurante
+
             libroPanel.add(nombreLibro);
             libroPanel.add(solicitar);
-            // Agregar el panel del restaurante al panel principal
             contentPanel.add(libroPanel);
         }
-        // Agregar el panel principal al JScrollPane
-        LibrosDisponibles.setViewportView(contentPanel);
 
+        // Bot髇 Salir inicializado y agregado
+        Salir = new JButton("Salir");
+        Salir.setAlignmentX(Component.CENTER_ALIGNMENT);
+        Salir.addActionListener(e -> dispose());
+        contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        contentPanel.add(Salir);
+
+        // JScrollPane para libros y botones
+        LibrosDisponibles = new JScrollPane(contentPanel);
+
+        // Agregar el scroll pane al panel principal
+        MainPanel.add(LibrosDisponibles, BorderLayout.CENTER);
+
+        // Setear panel principal como contenido del JFrame
+        setContentPane(MainPanel);
+
+        // Hacer visible la ventana al final de la configuraci髇
+        setVisible(true);
     }
-
-
 }
+

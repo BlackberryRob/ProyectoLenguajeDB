@@ -52,7 +52,7 @@ GROUP BY
 
 --Procedimientos Almacenados
 
---Inserta un nuevo préstamo.
+--Inserta un nuevo prï¿½stamo.
 CREATE OR REPLACE PROCEDURE Realizar_Prestamo (
     p_Id_Libro IN NUMBER,
     p_Id_Usuario IN NUMBER
@@ -61,19 +61,19 @@ CREATE OR REPLACE PROCEDURE Realizar_Prestamo (
     v_new_id NUMBER;
     v_new_dev_id NUMBER;
 BEGIN
-    -- Verificar si el libro está disponible
+    -- Verificar si el libro estï¿½ disponible
     SELECT Disponible INTO v_disponible
     FROM Libro
     WHERE Id_Libro_PK = p_Id_Libro;
 
     IF v_disponible = 0 THEN
-        RAISE_APPLICATION_ERROR(-20001, 'El libro no está disponible para préstamo.');
+        RAISE_APPLICATION_ERROR(-20001, 'El libro no estï¿½ disponible para prï¿½stamo.');
     END IF;
 
-    -- Generar un nuevo ID para el préstamo
+    -- Generar un nuevo ID para el prï¿½stamo
     SELECT MAX(Id_Prestamo_PK) + 1 INTO v_new_id FROM Prestamo;
 
-    -- Insertar el préstamo
+    -- Insertar el prï¿½stamo
     INSERT INTO Prestamo (
         Id_Prestamo_PK,
         Id_Libro_PK,
@@ -108,11 +108,11 @@ BEGIN
 
 
     COMMIT;
-    DBMS_OUTPUT.PUT_LINE('Préstamo registrado correctamente.');
+    DBMS_OUTPUT.PUT_LINE('Prï¿½stamo registrado correctamente.');
 
 EXCEPTION
     WHEN NO_DATA_FOUND THEN
-        RAISE_APPLICATION_ERROR(-20002, 'No se encontró el libro.');
+        RAISE_APPLICATION_ERROR(-20002, 'No se encontrï¿½ el libro.');
     WHEN OTHERS THEN
         ROLLBACK;
         RAISE;
@@ -146,7 +146,7 @@ BEGIN
     INSERT INTO Libro_Autor (Id_Libro_PK, Id_Autor_PK)
     VALUES (v_new_libro_id, p_Id_Autor);
     
-    -- Asociar categoría
+    -- Asociar categorï¿½a
     INSERT INTO Libro_Categoria (Id_Libro_PK, Id_Categoria_PK)
     VALUES (v_new_libro_id, p_Id_Categoria);
     
@@ -184,7 +184,7 @@ CREATE OR REPLACE PROCEDURE Eliminar_Libro (
     v_prestamos NUMBER;
     v_sanciones NUMBER;
 BEGIN
-    -- Verificar préstamos
+    -- Verificar prï¿½stamos
     SELECT COUNT(*) INTO v_prestamos FROM Prestamo WHERE Id_Libro_PK = p_Id_Libro;
     
     -- Verificar sanciones asociadas a devoluciones del libro
@@ -196,7 +196,7 @@ BEGIN
     WHERE p.Id_Libro_PK = p_Id_Libro;
     
     IF v_prestamos > 0 OR v_sanciones > 0 THEN
-        RAISE_APPLICATION_ERROR(-20003, 'No se puede eliminar: existen préstamos o sanciones asociadas.');
+        RAISE_APPLICATION_ERROR(-20003, 'No se puede eliminar: existen prï¿½stamos o sanciones asociadas.');
     ELSE
         DELETE FROM Libro_Autor WHERE Id_Libro_PK = p_Id_Libro;
         DELETE FROM Libro_Categoria WHERE Id_Libro_PK = p_Id_Libro;
@@ -246,3 +246,98 @@ END;
 
 SELECT Obtener_Titulo_Libro(1) FROM dual;
 EXEC Listar_Libros_Disponibles;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//AVANCE ALEJANDRO
+CREATE SEQUENCE Devolucion_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE Sancion_seq START WITH 1 INCREMENT BY 1;
+
+CREATE OR REPLACE PROCEDURE Registrar_Devolucion (
+    P_Id_Prestamo NUMBER,
+    P_Fecha_Devolucion DATE
+) AS
+    V_Id_Usuario NUMBER;
+    V_Id_Libro NUMBER;
+    V_Fecha_Prestamo DATE;
+    V_Fecha_Limite DATE;
+    V_Retraso NUMBER;
+    V_Id_Devolucion NUMBER;
+BEGIN
+    -- Obtener datos del prÃ©stamo
+    SELECT Id_Usuario_FK, Id_Libro_PK, Fecha_Prestamo
+    INTO V_Id_Usuario, V_Id_Libro, V_Fecha_Prestamo
+    FROM Prestamo
+    WHERE Id_Prestamo_PK = P_Id_Prestamo;
+
+    -- Calcular fecha lÃ­mite: prÃ©stamo + 7 dÃ­as
+    V_Fecha_Limite := V_Fecha_Prestamo + 7;
+
+    -- Generar ID devoluciÃ³n
+    V_Id_Devolucion := Devolucion_seq.NEXTVAL;
+
+    -- Insertar devoluciÃ³n
+    INSERT INTO Devolucion (
+        Id_Devolucion_PK,
+        Id_Prestamo_FK,
+        Fecha_Devolucion,
+        Devuelto
+    ) VALUES (
+        V_Id_Devolucion,
+        P_Id_Prestamo,
+        P_Fecha_Devolucion,
+        1 -- Devuelto = sÃ­
+    );
+
+    -- Marcar libro como disponible
+    UPDATE Libro
+    SET Disponible = 1
+    WHERE Id_Libro_PK = V_Id_Libro;
+
+    -- Verificar retraso y registrar sanciÃ³n si aplica
+    IF P_Fecha_Devolucion > V_Fecha_Limite THEN
+        V_Retraso := P_Fecha_Devolucion - V_Fecha_Limite;
+        Registrar_Sancion(
+            P_Id_Usuario => V_Id_Usuario,
+            P_Id_Devolucion => V_Id_Devolucion,
+            P_Monto => V_Retraso * 1000 -- ajusta monto
+        );
+    END IF;
+END;
+/
+
+
+
+CREATE OR REPLACE PROCEDURE Registrar_Sancion (
+    P_Id_Usuario NUMBER,
+    P_Id_Devolucion NUMBER,
+    P_Monto NUMBER
+) AS
+BEGIN
+    INSERT INTO Sancion (
+        Id_Sancion_PK,
+        Id_Usuario_FK,
+        Id_Devolucion_FK,
+        Monto,
+        Pagado
+    ) VALUES (
+        Sancion_seq.NEXTVAL,
+        P_Id_Usuario,
+        P_Id_Devolucion,
+        P_Monto,
+        0  -- No pagado
+    );
+END;
+/
