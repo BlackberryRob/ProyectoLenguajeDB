@@ -7,20 +7,18 @@ import org.example.DBConnection;
 
 public class SancionDAO {
 
-    public void registrarSancion(int idUsuario, int idDevolucion, double monto) {
+    public void registrarSancion(int idDevolucion) {
         Connection con = null;
         CallableStatement stmt = null;
 
         try {
             con = DBConnection.getConnection();
-            stmt = con.prepareCall("{ call Registrar_Sancion(?, ?, ?) }");
+            stmt = con.prepareCall("{ call Registrar_Sancion(?) }");
 
-            stmt.setInt(1, idUsuario);
-            stmt.setInt(2, idDevolucion);
-            stmt.setDouble(3, monto);
+            stmt.setInt(1, idDevolucion);
 
             stmt.execute();
-            System.out.println("✅ Sanción registrada correctamente.");
+            System.out.println("✅ Sanción registrada correctamente (si aplicaba).");
         } catch (SQLException e) {
             System.err.println("❌ Error al registrar sanción: " + e.getMessage());
         } finally {

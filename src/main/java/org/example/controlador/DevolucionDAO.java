@@ -2,22 +2,20 @@ package org.example.controlador;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.SQLException;
 import org.example.DBConnection;
 
 public class DevolucionDAO {
 
-    public void registrarDevolucion(int idPrestamo, java.util.Date fechaDevolucion) {
+    public void registrarDevolucion(int idPrestamo) {
         Connection con = null;
         CallableStatement stmt = null;
 
         try {
             con = DBConnection.getConnection();
-            stmt = con.prepareCall("{ call Registrar_Devolucion(?, ?) }");
+            stmt = con.prepareCall("{ call Registrar_Devolucion(?) }");
 
             stmt.setInt(1, idPrestamo);
-            stmt.setDate(2, new Date(fechaDevolucion.getTime()));
 
             stmt.execute();
             System.out.println("✅ Devolución registrada correctamente.");

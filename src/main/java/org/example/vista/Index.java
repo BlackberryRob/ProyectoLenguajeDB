@@ -1,83 +1,144 @@
 package org.example.vista;
 
+import org.example.controlador.CompraLibroDAO;
+import org.example.controlador.DevolucionDAO;
 import org.example.controlador.LibroDAO;
-import org.example.modelo.LibroDisponible;
+import org.example.controlador.SancionDAO;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.List;
 
 public class Index extends JFrame {
-    private JPanel MainPanel;
-    private JButton Salir;
-    private JScrollPane LibrosDisponibles;
-    LibroDAO dao = new LibroDAO();
+    private JPanel mainPanel;
+    private JLabel Bienvenido;
+    private JButton librosDisponiblesButton;
+    private JButton AgregarLibroButton;
+    private JButton registraDevolucionButton;
+    private JButton inventarioLibros;
+    private JButton registrarSancion;
+    private JButton historialCompras;
 
-    public Index(List<LibroDisponible> librosDisponibles, int userId) {
-        // Configuraciones b�sicas de la ventana
+
+    public Index() {
+
+        // Configurar ventana
         setTitle("Biblioteca");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(400, 400);
+        setSize(450, 450);
         setLocationRelativeTo(null);
 
-        // Panel principal con BorderLayout
-        MainPanel = new JPanel(new BorderLayout());
 
-        // Panel para los libros con BoxLayout vertical
-        JPanel contentPanel = new JPanel();
-        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        Bienvenido.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        Bienvenido.setAlignmentX(Component.CENTER_ALIGNMENT);
+        Bienvenido.setForeground(new Color(33, 37, 41));
 
-        // Bot�n para registrar devoluci�n
-        JButton btnRegistrarDevolucion = new JButton("Registrar Devoluci�n");
-        btnRegistrarDevolucion.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnRegistrarDevolucion.addActionListener(e -> new FrmRegistrarDevolucion().setVisible(true));
-        contentPanel.add(btnRegistrarDevolucion);
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        // Listeners
+        librosDisponiblesButton.addActionListener(e -> {
+            LibroDAO dao = new LibroDAO();
 
-        // Bot�n para registrar sanci�n
-        JButton btnRegistrarSancion = new JButton("Registrar Sanci�n");
-        btnRegistrarSancion.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnRegistrarSancion.addActionListener(e -> new FrmRegistrarSancion().setVisible(true));
-        contentPanel.add(btnRegistrarSancion);
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+            try {
+                String inputBbtc = JOptionPane.showInputDialog(null, "Ingrese id de bibliotecario (1-50)");
+                String inputUsr = JOptionPane.showInputDialog(null, "Ingrese su id");
 
-        // Lista din�mica de libros disponibles con bot�n solicitar
-        for (LibroDisponible libroDisponible : librosDisponibles) {
-            JPanel libroPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+                if (inputBbtc == null || inputUsr == null) {
+                    // Cancelado por el usuario
+                    return;
+                }
 
-            JLabel nombreLibro = new JLabel(libroDisponible.getTitulo());
-            JButton solicitar = new JButton("Solicitar");
-            solicitar.addActionListener(e -> {
-                int idLibroDisponibleInt = libroDisponible.getId();
-                dao.realizarPrestamo(idLibroDisponibleInt, userId);
-                dispose();
-            });
+                int idBbtc = Integer.parseInt(inputBbtc.trim());
+                int idUsr = Integer.parseInt(inputUsr.trim());
 
-            libroPanel.add(nombreLibro);
-            libroPanel.add(solicitar);
-            contentPanel.add(libroPanel);
-        }
+                if (idBbtc < 1 || idBbtc > 50) {
+                    JOptionPane.showMessageDialog(null, "⚠️ El id del bibliotecario debe estar entre 1 y 50.",
+                            "ID inválido", JOptionPane.WARNING_MESSAGE);
+                    Index index = new Index();
+                    return;
 
-        // Bot�n Salir inicializado y agregado
-        Salir = new JButton("Salir");
-        Salir.setAlignmentX(Component.CENTER_ALIGNMENT);
-        Salir.addActionListener(e -> dispose());
-        contentPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        contentPanel.add(Salir);
+                }
 
-        // JScrollPane para libros y botones
-        LibrosDisponibles = new JScrollPane(contentPanel);
+                if (idUsr <= 0) {
+                    JOptionPane.showMessageDialog(null, "⚠️ El id del usuario debe ser un número positivo.",
+                            "ID inválido", JOptionPane.WARNING_MESSAGE);
+                    Index index = new Index();
+                    return;
+                }
 
-        // Agregar el scroll pane al panel principal
-        MainPanel.add(LibrosDisponibles, BorderLayout.CENTER);
+                VerLibrosDisponibles verLibrosDisponibles = new VerLibrosDisponibles(
+                        dao.obtenerLibrosDisponibles(), idUsr, idBbtc);
 
-        // Setear panel principal como contenido del JFrame
-        setContentPane(MainPanel);
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "❌ Ingrese solo números válidos para los IDs.",
+                        "Error de formato", JOptionPane.ERROR_MESSAGE);
+                Index index = new Index();
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "❌ Ocurrió un error inesperado.\nDetalles: " + ex.getMessage(),
+                        "Error", JOptionPane.ERROR_MESSAGE);
+                ex.printStackTrace();
+                Index index = new Index();
+            }
+        });
 
-        // Hacer visible la ventana al final de la configuraci�n
+
+        librosDisponiblesButton.addActionListener(e -> dispose());
+
+        inventarioLibros.addActionListener(e -> {
+            LibroDAO dao = new LibroDAO();
+            InventarioLibros inventarioLibros1 = new InventarioLibros(dao.obtenerInventarioLibros());
+                });
+        inventarioLibros.addActionListener(e -> dispose());
+
+        historialCompras.addActionListener(e -> {
+            CompraLibroDAO dao = new CompraLibroDAO();
+            HistorialCompras historialCompras = new HistorialCompras(dao.obtenerComprasLibros());
+        });
+
+        historialCompras.addActionListener(e -> dispose());
+
+        // Acción del botón Devolución
+        registraDevolucionButton.addActionListener(e -> {
+            try {
+                int idDevolucion = Integer.parseInt(
+                        JOptionPane.showInputDialog(null, "Ingrese el ID del préstamo")
+                );
+                DevolucionDAO ddao = new DevolucionDAO();
+
+                try {
+                    ddao.registrarDevolucion(idDevolucion);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "❌ Error al registrar la devolución:\n" + ex.getMessage());
+                    ex.printStackTrace(); // Opcional: ayuda en desarrollo
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "⚠️ ID inválido. Intente nuevamente.");
+            }
+        });
+
+        registrarSancion.addActionListener(e -> {
+            try {
+                int idDevolucion = Integer.parseInt(
+                        JOptionPane.showInputDialog(null, "Ingrese el ID de la devolución")
+                );
+                SancionDAO sdao = new SancionDAO();
+
+                try {
+                    sdao.registrarSancion(idDevolucion);
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "❌ Error al registrar la devolución:\n" + ex.getMessage());
+                    ex.printStackTrace(); // Opcional: ayuda en desarrollo
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "⚠️ ID inválido. Intente nuevamente.");
+            }
+        });
+
+        AgregarLibroButton.addActionListener(e -> {
+            AgregarLibro agregarLibro = new AgregarLibro();
+        });
+        AgregarLibroButton.addActionListener(e -> dispose());
+
+        mainPanel.setBorder(BorderFactory.createTitledBorder("Menu Principal"));
+
+        setContentPane(mainPanel);
         setVisible(true);
     }
 }
-
