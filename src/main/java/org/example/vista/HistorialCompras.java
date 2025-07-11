@@ -1,6 +1,7 @@
 package org.example.vista;
 
 import org.example.controlador.CompraLibroDAO;
+import org.example.controlador.LibroDAO;
 import org.example.modelo.CompraLibro;
 import org.example.modelo.LibroDisponible;
 
@@ -14,6 +15,7 @@ public class HistorialCompras extends JFrame{
     private JButton regresarButton;
 
     CompraLibroDAO compraLibroDAO = new CompraLibroDAO();
+    LibroDAO dao = new LibroDAO();
 
     public HistorialCompras (List<CompraLibro> comprasLibro){
         setTitle("Biblioteca");
@@ -21,7 +23,7 @@ public class HistorialCompras extends JFrame{
         setSize(500, 450);
         setLocationRelativeTo(null);
 
-        regresarButton.addActionListener(e -> {Index index = new Index();});
+        regresarButton.addActionListener(e -> {Index index = new Index(dao.obtenerLibrosDisponibles());});
         regresarButton.addActionListener(e -> dispose());
 
         JPanel contentPanel = new JPanel();
@@ -65,7 +67,7 @@ public class HistorialCompras extends JFrame{
         }
 
         // ScrollPane con título y scroll suave
-        historialCompras.setBorder(BorderFactory.createTitledBorder("Libros Disponibles"));
+        historialCompras.setBorder(BorderFactory.createTitledBorder("Compras"));
         historialCompras.setViewportView(contentPanel);
         historialCompras.getVerticalScrollBar().setUnitIncrement(16);
 

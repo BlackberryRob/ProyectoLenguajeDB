@@ -29,7 +29,7 @@ public class InventarioLibros extends JFrame {
         // Crear el botón regresar
         regresarButton = new JButton("Regresar");
         regresarButton.addActionListener(e -> {
-            new Index(); // Abrir ventana Index
+            new Index(dao.obtenerLibrosDisponibles()); // Abrir ventana Index
             dispose();   // Cerrar actual
         });
 

@@ -17,6 +17,7 @@ public class AgregarLibro extends JFrame{
     private JTextField precio;
     private JTextField autor;
     private JTextField categoria;
+    LibroDAO dao = new LibroDAO();
 
     public AgregarLibro() {
         setTitle("Biblioteca");
@@ -88,7 +89,7 @@ public class AgregarLibro extends JFrame{
 
 
         regresarButton.addActionListener(e -> {
-            Index index = new Index();
+            Index index = new Index(dao.obtenerLibrosDisponibles());
         });
         regresarButton.addActionListener(e -> dispose());
 
