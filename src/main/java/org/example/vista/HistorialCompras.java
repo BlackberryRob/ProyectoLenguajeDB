@@ -20,7 +20,7 @@ public class HistorialCompras extends JFrame{
     public HistorialCompras (List<CompraLibro> comprasLibro){
         setTitle("Biblioteca");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setSize(500, 450);
+        setSize(620, 450);
         setLocationRelativeTo(null);
 
         regresarButton.addActionListener(e -> {Index index = new Index(dao.obtenerLibrosDisponibles());});

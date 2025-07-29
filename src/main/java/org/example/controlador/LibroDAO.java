@@ -62,7 +62,7 @@ public class LibroDAO {
     //Procedimientos Almacenados
     //Realizar_Prestamo
     public void realizarPrestamo(int idLibro, int idUsuario, int idBibliotecario) {
-        String sql = "{ call Realizar_Prestamo(?, ?, ?) }";
+        String sql = "{ call pkg_prestamos.Realizar_Prestamo(?, ?, ?) }";
 
         try (Connection conn = DBConnection.getConnection();
              CallableStatement stmt = conn.prepareCall(sql)) {
@@ -82,7 +82,7 @@ public class LibroDAO {
 
     //Agregar_Libro
     public void agregarLibro(String titulo, Date fechaPublicacion, int idProveedor, double precio, int idAutor, int idCategoria) {
-        String sql = "{ call Agregar_Libro(?, ?, ?, ?, ?, ?) }";
+        String sql = "{ call pkg_catalogo.Agregar_Libro(?, ?, ?, ?, ?, ?) }";
 
         try (Connection conn = DBConnection.getConnection();
              CallableStatement stmt = conn.prepareCall(sql)) {

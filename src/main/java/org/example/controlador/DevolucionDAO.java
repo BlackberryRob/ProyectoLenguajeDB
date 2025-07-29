@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import org.example.DBConnection;
 
+import javax.swing.*;
+
 public class DevolucionDAO {
 
     public void registrarDevolucion(int idPrestamo) {
@@ -13,12 +15,13 @@ public class DevolucionDAO {
 
         try {
             con = DBConnection.getConnection();
-            stmt = con.prepareCall("{ call Registrar_Devolucion(?) }");
+            stmt = con.prepareCall("{ call pkg_prestamos.Registrar_Devolucion(?) }");
 
             stmt.setInt(1, idPrestamo);
 
             stmt.execute();
             System.out.println("✅ Devolución registrada correctamente.");
+            JOptionPane.showMessageDialog(null, "✅ Devolución registrada correctamente.");
         } catch (SQLException e) {
             System.err.println("❌ Error al registrar devolución: " + e.getMessage());
         } finally {
@@ -30,4 +33,5 @@ public class DevolucionDAO {
             }
         }
     }
+
 }
