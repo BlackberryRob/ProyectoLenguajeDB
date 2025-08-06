@@ -3,6 +3,7 @@ package org.example.controlador;
 import oracle.jdbc.internal.OracleTypes;
 import org.example.DBConnection;
 
+import javax.swing.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,38 @@ public class CursorDAO {
         }
 
         return cantidad;
+    }
+
+    public int verSancion(int idDevolucion) {
+        Connection con = null;
+        CallableStatement stmt = null;
+        int monto = 0;
+
+        try {
+            con = DBConnection.getConnection();
+            stmt = con.prepareCall("{ ? = call pkg_prestamos.Calcular_Multa(?) }");
+
+            stmt.registerOutParameter(1, java.sql.Types.NUMERIC); // número con decimales
+            stmt.setInt(2, idDevolucion);
+
+            stmt.execute();
+
+            monto = stmt.getInt(1); // Recuperamos el valor devuelto por la función
+
+            JOptionPane.showMessageDialog(null, "💰 El monto de la sanción es: ₡" + monto);
+
+        } catch (SQLException e) {
+            System.err.println("❌ Error al obtener monto de sanción: " + e.getMessage());
+        } finally {
+            try {
+                if (stmt != null) stmt.close();
+                if (con != null) con.close();
+            } catch (SQLException ex) {
+                System.err.println("❌ Error cerrando conexión: " + ex.getMessage());
+            }
+        }
+
+        return monto;
     }
 
     public List<String> getProveedores() {
@@ -198,7 +231,7 @@ public class CursorDAO {
         return bibliotecarios;
     }
 
-    // Prestamos pendientes del usuario
+    // Préstamos pendientes del usuario
     public List<String> getPrestamosPorUsuario(int usuarioId) {
         List<String> prestamos = new ArrayList<>();
         Connection con = null;
@@ -207,7 +240,7 @@ public class CursorDAO {
 
         try {
             con = DBConnection.getConnection();
-            stmt = con.prepareCall("{ call CURSOR_PRESTAMO(?, ?) }");
+            stmt = con.prepareCall("{ call pkg_prestamos.CURSOR_PRESTAMO(?, ?) }");
             stmt.setInt(1, usuarioId);
             stmt.registerOutParameter(2, OracleTypes.CURSOR);
             stmt.execute();

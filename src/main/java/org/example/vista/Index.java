@@ -25,6 +25,7 @@ public class Index extends JFrame{
     private JComboBox<String> listaBiliotecarios;
     private JPanel panelBibliotecario;
     private JComboBox<String> devolucion;
+    private JButton verSanciónButton;
     LibroDAO dao = new LibroDAO();
 
     public Index(List<LibroDisponible> librosDisponibles) {
@@ -209,6 +210,30 @@ public class Index extends JFrame{
 
             } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "⚠️ Error al leer el ID del usuario seleccionado.");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "❌ Ocurrió un error inesperado: " + ex.getMessage());
+            }
+        });
+
+        verSanciónButton.addActionListener(e -> {
+            try {
+                String seleccionado = (String) devolucion.getSelectedItem();
+
+                if (seleccionado == null || seleccionado.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "⚠️ No ha seleccionado ningún préstamo.");
+                    return;
+                }
+
+                // Extraer el ID antes del primer guion
+                String idStr = seleccionado.split("-")[0].trim();
+                int id = Integer.parseInt(idStr);
+
+                CursorDAO udao = new CursorDAO();
+                int resultado = udao.verSancion(id);
+
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "⚠️ Error al leer el ID de la devolucion seleccionada.");
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "❌ Ocurrió un error inesperado: " + ex.getMessage());
             }
